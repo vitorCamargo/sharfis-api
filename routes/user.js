@@ -27,21 +27,6 @@ router.post('/login', (req, res) => {
   });
 });
 
-router.post('/loginFacebook', (req, res) => {
-  const { id } = req.body;
-  const secret = 'secret';
-
-  User.findById({ _id: id }, (err, user) => {
-    if(err) res.status(400).send(err);
-
-    const token = jwt.sign({ id }, secret);
-
-    res.status(200).json({
-      auth: true, token, user
-    });
-  });
-});
-
 router.get('/', (req, res) => {
   User.getAllUsers((err, users) => {
     if(err) {
@@ -64,13 +49,13 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const {
-    phone, cpf, name, facebookID, image, password
+    name, email, username, image, password
   } = req.body;
 
   const newUser = {};
-  newUser.phone = phone;
-  newUser.cpf = cpf;
   newUser.name = name;
+  newUser.email = email;
+  newUser.username = username;
 
   if(password !== undefined && password !== '') {
     newUser.password = bcrypt.hashSync(password, 10);
@@ -79,7 +64,6 @@ router.post('/', (req, res) => {
   }
 
   newUser.image = image;
-  newUser.facebookID = facebookID;
 
   User.addUser(newUser, (err, user) => {
     if(err) {
@@ -92,7 +76,7 @@ router.post('/', (req, res) => {
 
 router.put('/', (req, res) => {
   const {
-    id, phone, cpf, name, password, image, facebookID
+    id, name, email, username, password, image
   } = req.body;
 
   const updatedUser = {};
@@ -103,27 +87,12 @@ router.put('/', (req, res) => {
     updatedUser.password = undefined;
   }
 
-  updatedUser.phone = phone;
-  updatedUser.cpf = cpf;
   updatedUser.name = name;
+  updatedUser.email = email;
+  updatedUser.username = username;
   updatedUser.image = image;
-  updatedUser.facebookID = facebookID;
 
   User.updateUser(id, updatedUser, (err, user) => {
-    if(err) {
-      console.log(err);
-      res.status(400).send('Can\'t update this user \n');
-    }
-    res.status(200).json(user);
-  });
-});
-
-router.put('/forms', (req, res) => {
-  const {
-    id, forms
-  } = req.body;
-
-  User.updateFormsUser(id, forms, (err, user) => {
     if(err) {
       console.log(err);
       res.status(400).send('Can\'t update this user \n');
