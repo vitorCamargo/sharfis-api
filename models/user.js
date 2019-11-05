@@ -6,9 +6,9 @@ const { Schema } = mongoose;
 const UserSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
-  username: { type: String, unique: true, required: true },
   password: { type: String },
   image: { type: String, default: 'https://res.cloudinary.com/dnnkqjrbi/image/upload/v1569545813/images_jxiacp.png', required: true },
+  folder: { type: Schema.Types.ObjectId, ref: 'File' }
 }, { timestamps: true });
 
 UserSchema.plugin(uniquevalidator);
@@ -30,8 +30,8 @@ module.exports.addUser = (user, callback) => {
 
   newUser.name = user.name;
   newUser.email = user.email;
-  newUser.username = user.username;
   newUser.password = user.password;
+  newUser.folder = user.folder;
 
   newUser.save(callback);
 };
@@ -42,9 +42,9 @@ module.exports.updateUser = (id, updatedUser, callback) => {
 
     user.name = updatedUser.name ? updatedUser.name : user.name;
     user.email = updatedUser.email ? updatedUser.email : user.email;
-    user.username = updatedUser.username ? updatedUser.username : user.username;
     user.password = updatedUser.password ? updatedUser.password : user.password;
     user.image = updatedUser.image ? updatedUser.image : user.image;
+    user.folder = updatedUser.folder ? updatedUser.folder : user.folder;
 
     user.save(callback);
   });

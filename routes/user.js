@@ -7,10 +7,10 @@ const User = require('../models/user');
 const router = express.Router();
 
 router.post('/login', (req, res) => {
-  const { phone, password } = req.body;
+  const { email, password } = req.body;
   const secret = 'secret';
 
-  User.findOne({ phone }, (err, user) => {
+  User.findOne({ email }, (err, user) => {
     if(err) res.status(400).send('Can\'t log user in');
     if(!user) res.status(401).send('Can\'t log user in, it doesn\'t exist');
     else {
@@ -49,21 +49,19 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const {
-    name, email, username, image, password
+    name, email, folder, password
   } = req.body;
 
   const newUser = {};
   newUser.name = name;
   newUser.email = email;
-  newUser.username = username;
+  newUser.folder = folder;
 
   if(password !== undefined && password !== '') {
     newUser.password = bcrypt.hashSync(password, 10);
   } else {
     newUser.password = undefined;
   }
-
-  newUser.image = image;
 
   User.addUser(newUser, (err, user) => {
     if(err) {
@@ -76,7 +74,7 @@ router.post('/', (req, res) => {
 
 router.put('/', (req, res) => {
   const {
-    id, name, email, username, password, image
+    id, name, email, folder, password, image
   } = req.body;
 
   const updatedUser = {};
@@ -89,7 +87,7 @@ router.put('/', (req, res) => {
 
   updatedUser.name = name;
   updatedUser.email = email;
-  updatedUser.username = username;
+  updatedUser.folder = folder;
   updatedUser.image = image;
 
   User.updateUser(id, updatedUser, (err, user) => {
