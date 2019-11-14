@@ -33,14 +33,13 @@ router.get('/directory/:directory', (req, res) => { // get file by directory
       console.log(err);
       res.status(400).send('Can\'t find a file with this directory_Id \n');
     }
+
     if (file.type === 2) {
-      // console.log(err);
       res.status(400).send('This is not a directory \n');
     }
     const tam = file.children.length;
     file.children.forEach((children, index) => {
-      // console.log(children[0]);
-      File.getFileById(children[0], (errr, files) => {
+      File.getFileById(children, (errr, files) => {
         if (errr) {
           console.log(err);
           res.status(400).send('Can\'t get a file \n');
@@ -90,34 +89,32 @@ router.get('/dirName/:dirName', (req, res) => { // get directory by name
 
 router.post('/', (req, res) => {
   const {
-    name, file, father, children, type,  owner, group
-  } = req.body; // sugar sintax
+    name, file, father, type, owner, shared_with
+  } = req.body;
 
   const newFile = {};
 
   newFile.name = name;
   newFile.file = file;
   newFile.father = father;
-  newFile.children = children;
   newFile.type = type;
   newFile.owner = owner;
-  newFile.group = group;
+  newFile.shared_with = shared_with;
 
   File.addFile(newFile, (err, fileRes) => {
-    if (err) {
+    if(err) {
       console.log(err);
       res.status(400).send('Can\'t create the File \n');
     }
+
     File.getFileById(father, (errFather, fileFather) => {
-      if (errFather) {
+      if(errFather) {
         console.log(errFather);
         res.status(400).send('Can\'t create the File \n');
       }
 
-      const childrenFather = fileFather.children;
-      childrenFather.push(fileRes._id);
       const updateFile = {};
-      updateFile.children = childrenFather;
+      updateFile.children = fileFather.children.concat(fileRes._id);
       File.updateFile(father, updateFile, (errorFather) => {
         if (errorFather) {
           console.log(errorFather);
@@ -131,7 +128,7 @@ router.post('/', (req, res) => {
 
 router.put('/', (req, res) => {
   const {
-    name, file, father, children, type, owner, group, id
+    name, file, father, children, owner, shared_with, id
   } = req.body; // sugar sintax
 
   const updatedFile = {};
@@ -140,9 +137,8 @@ router.put('/', (req, res) => {
   updatedFile.file = file;
   updatedFile.father = father;
   updatedFile.children = children;
-  updatedFile.type = type;
   updatedFile.owner = owner;
-  updatedFile.group = group;
+  updatedFile.shared_with = shared_with;
 
   File.updateFile(id, updatedFile, (err, fileResponse) => {
     if (err) {
@@ -156,40 +152,40 @@ router.put('/', (req, res) => {
 router.put('/move', (req, res) => {
   const {
     idChild, idFather
-  } = req.body; // sugar sintax
+  } = req.body;
 
   File.getFileById(idChild, (err, file) => {
-    if (err || file.father.length === 0 || file._id === null) {
+    if(err || !idFather || !file) {
       console.log(err);
       res.status(400).send('Can\'t move this file \n');
+    } else {
+      File.moveFile(file, idFather, (error, fileResponse) => {
+        if (error) {
+          console.log(err);
+          res.status(400).send('Can\'t move this file \n');
+        }
+
+        res.status(200).json(fileResponse);
+      });
     }
-
-    File.moveFile(file, idFather, (error, fileResponse) => {
-      if (error) {
-        console.log(err);
-        res.status(400).send('Can\'t move this file \n');
-      }
-
-      res.status(200).json(fileResponse);
-    });
   });
 });
 
 router.delete('/:id', (req, res) => {
   File.getFileById(req.params.id, (err, file) => {
-    if (err || file.father.length === 0 || file._id === null) {
+    if (err || file.father === null || !file) {
       console.log(err);
       res.status(400).send('Can\'t delete this file \n');
+    } else {
+      File.deleteFile(file, (error, fileResponse) => {
+        if (error) {
+          console.log(err);
+          res.status(400).send('Can\'t delete this file \n');
+        }
+
+        res.status(200).json(fileResponse);
+      });
     }
-
-    File.deleteFile(file, (error, fileResponse) => {
-      if (error) {
-        console.log(err);
-        res.status(400).send('Can\'t delete this file \n');
-      }
-
-      res.status(200).json(fileResponse);
-    });
   });
 });
 

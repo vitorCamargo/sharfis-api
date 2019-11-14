@@ -8,6 +8,7 @@ const UserSchema = new Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String },
   image: { type: String, default: 'https://res.cloudinary.com/dnnkqjrbi/image/upload/v1569545813/images_jxiacp.png', required: true },
+  shared_files: [{ type: Schema.Types.ObjectId, ref: 'File' }],
   folder: { type: Schema.Types.ObjectId, ref: 'File' }
 }, { timestamps: true });
 
@@ -44,6 +45,7 @@ module.exports.updateUser = (id, updatedUser, callback) => {
     user.email = updatedUser.email ? updatedUser.email : user.email;
     user.password = updatedUser.password ? updatedUser.password : user.password;
     user.image = updatedUser.image ? updatedUser.image : user.image;
+    user.shared_files = updatedUser.shared_files ? updatedUser.shared_files : user.shared_files;
     user.folder = updatedUser.folder ? updatedUser.folder : user.folder;
 
     user.save(callback);

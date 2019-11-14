@@ -3,6 +3,7 @@ const bcrypt = require('twin-bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const File = require('../models/file');
 
 const router = express.Router();
 
@@ -49,13 +50,12 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const {
-    name, email, folder, password
+    name, email, password
   } = req.body;
 
   const newUser = {};
   newUser.name = name;
   newUser.email = email;
-  newUser.folder = folder;
 
   if(password !== undefined && password !== '') {
     newUser.password = bcrypt.hashSync(password, 10);
@@ -68,13 +68,45 @@ router.post('/', (req, res) => {
       console.log(err);
       res.status(400).send('Can\'t create the user \n');
     }
-    res.status(200).json(user);
+
+    const newFile = {};
+    newFile.owner = user._id;
+    newFile.name = `ROOT ${user.name.split(" ")[0]}`
+    newFile.type = 1;
+
+    File.addFile(newFile, (err, fileRes) => {
+      if(err) {
+        console.log(err);
+        res.status(400).send('Can\'t create the User File Root \n');
+      }
+
+      File.getRootSystem((errFather, fileFather) => {
+        if(errFather) {
+          console.log(errFather);
+          res.status(400).send('Can\'t create the User File Root \n');
+        }
+
+        const updateFile = {};
+        updateFile.children = fileFather.children.concat([fileRes._id]);
+
+        File.updateFile(fileFather._id, updateFile, (errorFather) => {
+          if(errorFather) {
+            console.log(errorFather);
+            res.status(400).send('Can\'t create the File \n');
+          }
+        });
+      });
+
+      user.folder = fileRes._id;
+      user.save();
+      res.status(200).json(user);
+    });
   });
 });
 
 router.put('/', (req, res) => {
   const {
-    id, name, email, folder, password, image
+    id, name, email, shared_files, folder, password, image
   } = req.body;
 
   const updatedUser = {};
@@ -89,6 +121,7 @@ router.put('/', (req, res) => {
   updatedUser.email = email;
   updatedUser.folder = folder;
   updatedUser.image = image;
+  updatedUser.shared_files = shared_files;
 
   User.updateUser(id, updatedUser, (err, user) => {
     if(err) {
