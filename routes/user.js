@@ -138,7 +138,15 @@ router.delete('/:id', (req, res) => {
       console.log(err);
       res.status(400).send('Can\'t delete this user \n');
     }
-    res.status(200).json(user);
+
+    File.deleteFile(user.folder, (errFile, file) => {
+      if(errFile) {
+        console.log(err);
+        res.status(400).send('Can\'t delete this user \n');
+      }
+
+      res.status(200).json(user);
+    });
   });
 });
 
