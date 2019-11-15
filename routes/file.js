@@ -190,6 +190,7 @@ router.put('/sharing', (req, res) => {
       User.findOne({ _id: shared_with[i] }, (errUser, user) => {
         if(!err) {
           user.shared_files = user.shared_files.concat([id]);
+          user.save();
         }
       });
     }
