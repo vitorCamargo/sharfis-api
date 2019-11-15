@@ -196,22 +196,6 @@ router.put('/sharing', (req, res) => {
 
     res.status(200).json(fileResponse);
   });
-
-  File.getFileById(id, (err, file) => {
-    if(err || !file) {
-      console.log(err);
-      res.status(400).send('Can\'t move this file \n');
-    } else {
-      File.moveFile(file, idFather, (error, fileResponse) => {
-        if (error) {
-          console.log(err);
-          res.status(400).send('Can\'t move this file \n');
-        }
-
-        res.status(200).json(fileResponse);
-      });
-    }
-  });
 });
 
 router.delete('/:id', (req, res) => {
