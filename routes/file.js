@@ -1,6 +1,7 @@
 const express = require('express'); // first of all import express
 
 const File = require('../models/file'); // link route in the models
+const User = require('../models/user'); // link route in the models
 
 const router = express.Router(); // express tool for make the route 'requires'
 
@@ -156,6 +157,48 @@ router.put('/move', (req, res) => {
 
   File.getFileById(idChild, (err, file) => {
     if(err || !idFather || !file) {
+      console.log(err);
+      res.status(400).send('Can\'t move this file \n');
+    } else {
+      File.moveFile(file, idFather, (error, fileResponse) => {
+        if (error) {
+          console.log(err);
+          res.status(400).send('Can\'t move this file \n');
+        }
+
+        res.status(200).json(fileResponse);
+      });
+    }
+  });
+});
+
+router.put('/sharing', (req, res) => {
+  const {
+    shared_with, id
+  } = req.body;
+
+  const updatedFile = {};
+  updatedFile.shared_with = shared_with;
+
+  File.updateFile(id, updatedFile, (err, fileResponse) => {
+    if(err) {
+      console.log(err);
+      res.status(400).send('Can\'t update this file \n');
+    }
+
+    for(var i = 0; i < shared_with.length; i++) {
+      User.findOne({ _id: shared_with[i] }, (errUser, user) => {
+        if(!err) {
+          user.files_shared = user.files_shared.concat([id]);
+        }
+      });
+    }
+
+    res.status(200).json(fileResponse);
+  });
+
+  File.getFileById(id, (err, file) => {
+    if(err || !file) {
       console.log(err);
       res.status(400).send('Can\'t move this file \n');
     } else {

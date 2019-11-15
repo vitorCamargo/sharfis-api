@@ -86,6 +86,7 @@ module.exports.moveFile = (file, idFather, callback) => {
 
       const updateFileChild = {};
       updateFileChild.father = idFather;
+      updateFileChild.shared_with = updateFileChild.shared_with.concat(resFather.shared_with)
 
       File.updateFile(idChild, updateFileChild, (errChild, resChild) => {
         if(errFather) callback(errChild, null);
