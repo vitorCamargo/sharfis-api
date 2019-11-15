@@ -56,7 +56,12 @@ module.exports.addFile = (FileDir, callback) => {
   newFile.father = FileDir.father;
   newFile.type = FileDir.type;
   newFile.owner = FileDir.owner;
-  newFile.shared_with = FileDir.shared_with;
+
+  File.findOne({ _id: fileDir.father }, (err, file) => {
+    if(!err && file) {
+      newFile.shared_with = file.shared_with;
+    }
+  });
 
   newFile.save(callback);
 };

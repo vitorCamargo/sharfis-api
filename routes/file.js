@@ -90,7 +90,7 @@ router.get('/dirName/:dirName', (req, res) => { // get directory by name
 
 router.post('/', (req, res) => {
   const {
-    name, file, father, type, owner, shared_with
+    name, file, father, type, owner
   } = req.body;
 
   const newFile = {};
@@ -100,7 +100,6 @@ router.post('/', (req, res) => {
   newFile.father = father;
   newFile.type = type;
   newFile.owner = owner;
-  newFile.shared_with = shared_with;
 
   File.addFile(newFile, (err, fileRes) => {
     if(err) {
