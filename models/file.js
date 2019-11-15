@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const User = require('./user');
+
 const FileSchema = new Schema({
   name: { type: String },
   file: { type: Object },
@@ -86,10 +88,22 @@ module.exports.moveFile = (file, idFather, callback) => {
 
       const updateFileChild = {};
       updateFileChild.father = idFather;
-      updateFileChild.shared_with = updateFileChild.shared_with.concat(resFather.shared_with)
+
+      const shared_with = file.shared_with.concat(resFather.shared_with)
+      updateFileChild.shared_with = shared_with.filter((r, i) => shared_with.indexOf(r) === i);
 
       File.updateFile(idChild, updateFileChild, (errChild, resChild) => {
         if(errFather) callback(errChild, null);
+
+        for(var i = 0; i < resChild.shared_with.length; i++) {
+          User.findOne({ _id: resChild.shared_with[i] }, (errUser, user) => {
+            if(!errUser && user) {
+              const shared_files = user.shared_files.concat([resChild._id]);
+              user.shared_files = shared_files.filter((r, i) => shared_files.indexOf(r) === i);
+              user.save();
+            }
+          });
+        }
 
         callback(null, resChild);
       });

@@ -178,7 +178,7 @@ router.put('/sharing', (req, res) => {
   } = req.body;
 
   const updatedFile = {};
-  updatedFile.shared_with = shared_with;
+  updatedFile.shared_with = shared_with.filter((r, i) => shared_with.indexOf(r) === i);
 
   File.updateFile(id, updatedFile, (err, fileResponse) => {
     if(err) {
@@ -188,8 +188,9 @@ router.put('/sharing', (req, res) => {
 
     for(var i = 0; i < shared_with.length; i++) {
       User.findOne({ _id: shared_with[i] }, (errUser, user) => {
-        if(!err) {
-          user.shared_files = user.shared_files.concat([id]);
+        if(!errUser) {
+          const shared_files = user.shared_files.concat([id]);
+          user.shared_files = shared_files.filter((r, i) => shared_files.indexOf(r) === i);
           user.save();
         }
       });
