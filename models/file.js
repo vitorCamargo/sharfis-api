@@ -50,20 +50,20 @@ module.exports.getFileById = (id, callback) => {
 // Create File
 module.exports.addFile = (FileDir, callback) => {
   const newFile = new File();
-
-  newFile.name = FileDir.name;
-  newFile.file = FileDir.file;
-  newFile.father = FileDir.father;
-  newFile.type = FileDir.type;
-  newFile.owner = FileDir.owner;
-
   File.findOne({ _id: FileDir.father }, (err, file) => {
     if(!err && file) {
+      newFile.name = FileDir.name;
+      newFile.file = FileDir.file;
+      newFile.father = FileDir.father;
+      newFile.type = FileDir.type;
+      newFile.owner = FileDir.owner;
+
       newFile.shared_with = file.shared_with;
+      newFile.save(callback);
+    } else {
+      callback(err, null);
     }
   });
-
-  newFile.save(callback);
 };
 
 // Move File
