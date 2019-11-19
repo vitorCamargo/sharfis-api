@@ -12,6 +12,7 @@ const FileSchema = new Schema({
   type: { type: Number, required: true }, // 1 - Directory 2 - File
   owner: { type: Schema.Types.ObjectId, ref: 'User' },
   isRoot: { type: Boolean, default: false },
+  isGlobal: { type: Boolean, default: false },
   shared_with: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 }, { timestamps: true });
 
@@ -21,6 +22,10 @@ module.exports = File;
 
 module.exports.getRootSystem = (callback) => {
   File.findOne({ type: 0, isRoot: true }, callback);
+};
+
+module.exports.getGlobalDirectory = (callback) => {
+  File.findOne({ type: 0, isGlobal: true }, callback);
 };
 
 // Search All Files

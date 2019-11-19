@@ -16,6 +16,17 @@ router.get('/', (req, res) => {
   });
 });
 
+router.get('/global', (req, res) => {
+  File.getGlobalDirectory((err, files) => {
+    if (err) {
+      console.log(err);
+      res.status(400).send('Can\'t find a file/directory \n');
+    }
+
+    res.status(200).json(files);
+  });
+});
+
 router.get('/:id', (req, res) => {
   File.getFileById(req.params.id, (err, file) => {
     if (err) {
