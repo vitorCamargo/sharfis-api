@@ -67,40 +67,40 @@ router.post('/', (req, res) => {
     if(err) {
       console.log(err);
       res.status(400).send('Can\'t create the user \n');
-    }
+    } else {
+      const newFile = {};
+      newFile.owner = user._id;
+      newFile.name = `ROOT ${user.name.split(" ")[0]}`
+      newFile.type = 1;
 
-    const newFile = {};
-    newFile.owner = user._id;
-    newFile.name = `ROOT ${user.name.split(" ")[0]}`
-    newFile.type = 1;
-
-    File.addFile(newFile, (err, fileRes) => {
-      if(err) {
-        console.log(err);
-        res.status(400).send('Can\'t create the User File Root \n');
-      }
-
-      File.getRootSystem((errFather, fileFather) => {
-        if(errFather) {
-          console.log(errFather);
+      File.addFile(newFile, (err, fileRes) => {
+        if(err && !fileRes) {
+          console.log(err);
           res.status(400).send('Can\'t create the User File Root \n');
+        } else {
+          File.getRootSystem((errFather, fileFather) => {
+            if(errFather && !fileFather) {
+              console.log(errFather);
+              res.status(400).send('Can\'t create the User File Root \n');
+            } else {
+              const updateFile = {};
+              updateFile.children = fileFather.children.concat([fileRes._id]);
+
+              File.updateFile(fileFather._id, updateFile, (errorFather) => {
+                if(errorFather) {
+                  console.log(errorFather);
+                  res.status(400).send('Can\'t create the File \n');
+                }
+              });
+            }
+          });
+
+          user.folder = fileRes._id;
+          user.save();
+          res.status(200).json(user);
         }
-
-        const updateFile = {};
-        updateFile.children = fileFather.children.concat([fileRes._id]);
-
-        File.updateFile(fileFather._id, updateFile, (errorFather) => {
-          if(errorFather) {
-            console.log(errorFather);
-            res.status(400).send('Can\'t create the File \n');
-          }
-        });
       });
-
-      user.folder = fileRes._id;
-      user.save();
-      res.status(200).json(user);
-    });
+    }
   });
 });
 
